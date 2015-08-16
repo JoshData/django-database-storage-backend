@@ -5,6 +5,8 @@ from django.conf import settings
 
 from .models import StoredFile, get_url_for_path
 
+import hashlib, mimetypes
+
 @deconstructible
 class DatabaseStorage(Storage):
 	def __init__(self, options=None):
@@ -21,16 +23,48 @@ class DatabaseStorage(Storage):
 		return ContentFile(sf.get_blob())
 
 	def _save(self, name, content):
+		# Read in the content.
+		content = content.read()
+
 		try:
+			# Update an existing file if the name corresponds to an existing file.
 			sf = StoredFile.objects.get(path=name)
+
 		except StoredFile.DoesNotExist:
+			# This name is for a new file. For privacy/security, don't use the file
+			# name given to us. Instead, hash the content.
 			sf = StoredFile()
+			name = DatabaseStorage.generate_name(name, content)
 
 		sf.path = name
-		sf.set_blob(content.read())
+		sf.set_blob(content)
 		sf.save()
 
 		return name
+
+	@staticmethod
+	def generate_name(name, content):
+		# Preserve the path where the image is stored (this usually comes from
+		# upload_to) but ignore the part after the last slash (the filename).
+		new_name = ""
+		if "/" in name:
+			new_name = name.rsplit("/", 1)[0] + "/"
+
+		# Replace the name with just the hash of the content.
+		new_name += hashlib.sha256(content).hexdigest().lower()
+
+		# If the name has a file extension, normalize the extension based
+		# on the presumed MIME type of the extension.
+		if "." in name:
+			ext = name.rsplit(".", 1)[-1]
+			mime_type, encoding = mimetypes.guess_type(name, strict=False)
+			if mime_type:
+				ext = mimetypes.guess_extension(mime_type, strict=False)
+				if ext:
+					new_name += ext
+
+		return new_name
+
 
 	# TYPICALLY IMPLEMENTED
 
