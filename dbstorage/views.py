@@ -18,6 +18,30 @@ def get_file_content_view(request, path):
 	file_content = sf.get_blob()
 	mime_type = sf.mime_type or "application/octet-stream"
 
+	if "size" in request.GET:
+		try:
+			file_content = transform_image(file_content, request.GET['size'])
+		except Exception as e:
+			return HttpResponse(str(e), status=500)
+
 	response = HttpResponse(file_content, content_type=mime_type)
 	response['Content-Disposition'] = 'inline; filename=' + os.path.basename(path)
 	return response
+
+def transform_image(file_content, size):
+	import io
+	from PIL import Image
+
+	try:
+		# Get the desired width from a small range of options.
+		width = { 'xs': 768, 'sm': 1024, 'md': 1100, 'lg': 1400 }[size]
+	except KeyError:
+		return file_content
+
+	# Resize the image and output at low quality jpeg to
+	# reduce bandwidth usage.
+	im = Image.open(io.BytesIO(file_content))
+	im.thumbnail((width, width), Image.ANTIALIAS)
+	buf = io.BytesIO()
+	im.save(buf, "JPEG", quality=25, optimize=True, progressive=True)
+	return buf.getvalue()

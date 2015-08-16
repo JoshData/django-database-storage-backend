@@ -12,7 +12,6 @@ Put `'dbstorage'` in your `INSTALLED_APPS` in your `settings.py`.
 
 Add `DEFAULT_FILE_STORAGE = 'dbstorage.storage.DatabaseStorage'` to your `settings.py`.
 
-
 Add to your `urls.py` URLconf:
 
 	url(r'^user-media', include('dbstorage.urls')),
@@ -23,7 +22,7 @@ Add a File or ImageFile field to your model:
 
 	image = models.ImageField(upload_to='some-root')
 
-`some-root` gets prefixed to all of the names of the files uploaded by this field. The names are stored in a database column.
+`some-root/` gets prefixed to all of the names of the files uploaded by this field. The names are stored in a database column.
 
 ## Features
 
@@ -32,3 +31,7 @@ Add a File or ImageFile field to your model:
 * MIME type autodetection (based on the file extension).
 * The backend supports `delete`, `exists`, `listdir`, `size`, `url`, `created_time`, and `modified_time`.
 * Stored files appear in the Django admin.
+
+## Dynamic image resizing
+
+When storing images, the view method can automatically resize an image to one of a few pre-defined sizes. To use this feature, you must install `pillow`. Then add `?width=` plus `xs` (768px), `sm` (1024 px), `md` (1100px), or `lg` (1400px) to the URL when accessing the image. The image returned in the response will have this size as a maximum dimension.
