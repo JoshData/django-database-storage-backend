@@ -34,7 +34,9 @@ def transform_image(file_content, size):
 
 	try:
 		# Get the desired width from a small range of options.
-		width = { 'xs': 768, 'sm': 1024, 'md': 1100, 'lg': 1400 }[size]
+		# 'tb' (thumbnail) is intended to be at least as good for og:image URLs,
+		# which for twitter summary cards must be at least 120px.
+		width = { 'tb': 320, 'xs': 768, 'sm': 1024, 'md': 1100, 'lg': 1400 }[size]
 	except KeyError:
 		return file_content
 
