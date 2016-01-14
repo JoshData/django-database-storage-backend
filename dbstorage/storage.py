@@ -3,7 +3,7 @@ from django.utils.deconstruct import deconstructible
 from django.core.files.base import ContentFile
 from django.conf import settings
 
-from .models import StoredFile, get_url_for_path
+from .models import StoredFile, get_url_for_path, PATH_MAX_LENGTH
 
 import hashlib, mimetypes
 
@@ -33,8 +33,14 @@ class DatabaseStorage(Storage):
 		except StoredFile.DoesNotExist:
 			# This name is for a new file. For privacy/security, don't use the file
 			# name given to us. Instead, hash the content.
-			sf = StoredFile()
 			name = DatabaseStorage.generate_name(name, content)
+			try:
+				# Still the file may exist. If it exists, the content is surely
+				# the same. But we'll update anyway.
+				sf = StoredFile.objects.get(path=name)
+			except StoredFile.DoesNotExist:
+				# Definitely a new file.
+				sf = StoredFile()
 
 		sf.path = name
 		sf.set_blob(content)
@@ -63,7 +69,7 @@ class DatabaseStorage(Storage):
 				if ext:
 					new_name += ext
 
-		return new_name
+		return new_name[0:PATH_MAX_LENGTH]
 
 
 	# TYPICALLY IMPLEMENTED

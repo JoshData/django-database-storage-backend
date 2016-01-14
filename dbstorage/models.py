@@ -6,12 +6,14 @@ import base64
 import mimetypes
 import zlib
 
+# path.max_length is at least as large as the default for
+# the FileField plus the maximum length of any upload_to.
+PATH_MAX_LENGTH = 256
+
 class StoredFile(models.Model):
 	"""A file stored in the storage."""
 
-		# max_length is at least as large as the default for
-		# the FileField plus the maximum length of any upload_to.
-	path = models.CharField(db_index=True, unique=True, max_length=256, help_text="The file name of the stored file.")
+	path = models.CharField(db_index=True, unique=True, max_length=PATH_MAX_LENGTH, help_text="The file name of the stored file.")
 	mime_type = models.CharField(max_length=128, blank=True, null=True, help_text="The MIME type of the stored file, if known.")
 
 	value = models.TextField(help_text="The encoded binary data in this file.")
