@@ -5,7 +5,7 @@ from django.conf import settings
 
 from .models import StoredFile, get_url_for_path, PATH_MAX_LENGTH
 
-import hashlib, mimetypes
+import hashlib, mimetypes, os.path
 
 @deconstructible
 class DatabaseStorage(Storage):
@@ -50,25 +50,28 @@ class DatabaseStorage(Storage):
 
 	@staticmethod
 	def generate_name(name, content):
-		# Preserve the path where the image is stored (this usually comes from
-		# upload_to) but ignore the part after the last slash (the filename).
-		new_name = ""
-		if "/" in name:
-			new_name = name.rsplit("/", 1)[0] + "/"
-
-		# Replace the name with just the hash of the content.
-		new_name += hashlib.sha256(content).hexdigest().lower()
+		# Replace the name with just the hash of the content. Since we have limited
+		# space to store the name, use SHA1 rather than SHA256.
+		new_name = hashlib.sha1(content).hexdigest().lower()
 
 		# If the name has a file extension, normalize the extension based
-		# on the presumed MIME type of the extension.
+		# on the presumed MIME type of the extension. Cap at 10 characters.
 		if "." in name:
 			ext = name.rsplit(".", 1)[-1]
 			mime_type, encoding = mimetypes.guess_type(name, strict=False)
 			if mime_type:
 				ext = mimetypes.guess_extension(mime_type, strict=False)
 				if ext:
-					new_name += ext
+					new_name += ext[:10]
 
+		# Preserve the path where the image is stored (this usually comes from
+		# upload_to) -- ignore the part after the last slash (the filename).
+		# Also make sure this doesn't bump the hash out of the max length.
+		if os.path.dirname(name):
+			new_name = os.path.dirname(name)[:PATH_MAX_LENGTH-len(new_name)-1] + "/" + new_name
+
+		# Return the name. For sanity's sake, ensure it's not longer than what
+		# we can store.
 		return new_name[0:PATH_MAX_LENGTH]
 
 
