@@ -18,7 +18,7 @@ def get_file_content_view(request, path):
 	file_content = sf.get_blob()
 	mime_type = sf.mime_type or "application/octet-stream"
 
-	if "size" in request.GET or "blur" in request.GET or "quality" in request.GET:
+	if "size" in request.GET or "blur" in request.GET or "quality" in request.GET or "brightness" in request.GET:
 		try:
 			file_content, mime_type = transform_image(file_content, request.GET)
 		except Exception as e:
@@ -30,7 +30,7 @@ def get_file_content_view(request, path):
 
 def transform_image(file_content, options):
 	import io
-	from PIL import Image, ImageFilter
+	from PIL import Image, ImageFilter, ImageEnhance
 
 	# Load the image.
 	im = Image.open(io.BytesIO(file_content))
@@ -38,6 +38,10 @@ def transform_image(file_content, options):
 	# Blur, if specified.
 	if options.get('blur'):
 		im = im.filter(ImageFilter.GaussianBlur(radius=3))
+
+	# Change lightness, if specified.
+	if options.get('brightness'):
+		im = ImageEnhance.Brightness(im).enhance(float(options['brightness']))
 
 	# Resize, if specified.
 
