@@ -1,6 +1,6 @@
 # django-database-storage
 
-A Django 1.7/1.8 storages backend backed by your existing database.
+A Django 1.7/1.8/1.9 storages backend backed by your existing database.
 
 This module provides an app named `dbstorage`. The app contains a single model `StoredFile` which is where files stored with the storage backend are put. The app also provides `DatabaseStorage` which you can set on your file fields.
 
