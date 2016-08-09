@@ -6,7 +6,9 @@ This module provides an app named `dbstorage`. The app contains a single model `
 
 ## Usage
 
-Put the `dbstorage` directory in your PYTHONPATH. (I'll make this installable at another time.)
+Install this package:
+
+	pip3 install git+https://github.com/if-then-fund/django-database-storage
 
 Put `'dbstorage'` in your `INSTALLED_APPS` in your `settings.py`.
 
