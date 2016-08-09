@@ -22,14 +22,14 @@ Add a File or ImageFile field to your model:
 
 	image = models.ImageField(upload_to='some-root')
 
-`some-root/` gets prefixed to all of the names of the files uploaded by this field. The names are stored in a database column.
+Files saved into this field will be stored in the database and available at the URL path `/user-media/some-root/{SHA1HASH}.{EXT}`. SHA1HASH is the SHA-1 hash of the file content. The file extension is normalized from the uploaded file's file extension (by round-tripping through [mimetypes.guess_type](https://docs.python.org/3.5/library/mimetypes.html#mimetypes.guess_type) and [mimetypes.guess_extension](https://docs.python.org/3.5/library/mimetypes.html#mimetypes.guess_extension)), so that no file name information besides the file's type is leaked. This also prevents unauthorized users from randomly guessing the URLs to uploaded files.
 
 ## Features
 
 * Easily configure a media storage backend that just uses your existing database for storing and serving your media files.
-* Filenames are replaced with the SHA256 hash of the file content, so you don't have to worry about leaking the name of the file when it was originally uploaded.
-* MIME type autodetection (based on the file extension).
-* The backend supports `delete`, `exists`, `listdir`, `size`, `url`, `created_time`, and `modified_time`.
+* Filenames don't leak the name of the file that it was uploaded from and are based on the file hash to prevent unauthorized users from guessing file URLs.
+* MIME type autodetection for the Content-Type header when downloading files (based on the file extension).
+* The backend supports the `delete`, `exists`, `listdir`, `size`, `url`, `created_time`, and `modified_time` functions.
 * Stored files appear in the Django admin.
 
 ## Dynamic image resizing
