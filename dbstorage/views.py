@@ -7,25 +7,57 @@ import os.path
 
 from .models import StoredFile
 
-@cache_control(public=True, max_age=60*60)
+@cache_control(public=True, max_age=60*60*3)
 def get_file_content_view(request, path):
-
+	# Get the StoredFile instance or 404 if the path is not found.
 	try:
 		sf = StoredFile.objects.get(path=path)
 	except StoredFile.DoesNotExist:
 		raise Http404()
 
+	# Get the file content.
 	file_content = sf.get_blob()
-	mime_type = sf.mime_type or "application/octet-stream"
 
+	# Choose the MIME type and disposition. For security, to prevent
+	# user-uploaded executable content from being served on our domain,
+	# which would be a cross-site scripting vulnerability, use headers
+	# that prevent content from being executed.
+	mime_type = "application/octet-stream"
+	disposition = "attachment"
+
+	# Allow trusted files to be viewed on our domain without downloading.
+	# Browsers won't execute "image/*" content, so those are safe to provide
+	# as images.
+	if sf.trusted or (sf.mime_type and sf.mime_type.startswith("image/")):
+		# If the file knows its MIME type, use it.
+		if sf.mime_type:
+			mime_type = sf.mime_type
+
+		# Allow it to be viewed in the browser.
+		disposition = "inline"
+
+	# Post-process images.
 	if "size" in request.GET or "blur" in request.GET or "quality" in request.GET or "brightness" in request.GET:
 		try:
 			file_content, mime_type = transform_image(file_content, request.GET)
 		except Exception as e:
 			return HttpResponse(str(e), status=500)
 
+	# Form the HTTP response.
 	response = HttpResponse(file_content, content_type=mime_type)
-	response['Content-Disposition'] = 'inline; filename=' + os.path.basename(path)
+	response['Content-Disposition'] = disposition + '; filename=' + os.path.basename(path)
+
+	# Browsers may guess the MIME type if it thinks it is wrong. Prevent
+	# that so that if we are forcing application/octet-stream, it
+	# doesn't guess around it and make the content executable.
+	response['X-Content-Type-Options'] = 'nosniff'
+
+	# Browsers may still allow HTML to be rendered in the browser. IE8
+	# apparently rendered HTML in the context of the domain even when a
+	# user clicks "Open" in an attachment-disposition response. This
+	# prevents that. Doesn't seem to affect anything else (like images).
+	response['X-Download-Options'] = 'noopen'
+
 	return response
 
 def transform_image(file_content, options):

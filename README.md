@@ -29,8 +29,8 @@ Files saved into this field will be stored in the database and available at the 
 ## Features
 
 * Easily configure a media storage backend that just uses your existing database for storing and serving your media files.
-* Filenames don't leak the name of the file that it was uploaded from and are based on the file hash to prevent unauthorized users from guessing file URLs.
-* MIME type autodetection for the Content-Type header when downloading files (based on the file extension).
+* Filenames don't leak the name of the file that it was uploaded from and are based on a hash of the file's content to prevent unauthorized users from guessing file URLs.
+* Secure headers are set to prevent untrusted content from being a cross-site scripting vulnerability.
 * The backend supports the `delete`, `exists`, `listdir`, `size`, `url`, `created_time`, and `modified_time` functions.
 * Stored files appear in the Django admin.
 

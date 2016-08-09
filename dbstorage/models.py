@@ -23,6 +23,8 @@ class StoredFile(models.Model):
 	encoding = models.IntegerField(choices=[(0, "None."), (1, "Base 64")])
 	gzipped = models.BooleanField()
 
+	trusted = models.BooleanField(default=False, help_text="Is this file trusted to be served from our own domain?")
+
 	created = models.DateTimeField(auto_now_add=True, db_index=True)
 	updated = models.DateTimeField(auto_now=True, db_index=True)
 
