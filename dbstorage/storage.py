@@ -22,9 +22,13 @@ class DatabaseStorage(Storage):
 		sf = StoredFile.objects.get(path=name)
 		return ContentFile(sf.get_blob())
 
-	def _save(self, name, content):
+	def _save(self, name, content_file):
 		# Read in the content.
-		content = content.read()
+		content_file.open()
+		try:
+			content = content_file.read()
+		finally:
+			content_file.close()
 
 		try:
 			# Update an existing file if the name corresponds to an existing file.
