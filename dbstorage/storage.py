@@ -102,7 +102,7 @@ class DatabaseStorage(Storage):
 		return (sorted(dirs), sorted(files))
 
 	def size(self, name):
-		return StoredFile.objects.get(path=name).size
+		return StoredFile.objects.only("size").get(path=name).size
 
 	def url(self, name):
 		return get_url_for_path(name)
@@ -113,9 +113,9 @@ class DatabaseStorage(Storage):
 
 	def created_time(self, name):
 		# should return a naive datetime!
-		return StoredFile.objects.get(path=name).created
+		return StoredFile.objects.only("created").get(path=name).created
 
 	def modified_time(self, name):
 		# should return a naive datetime!
-		return StoredFile.objects.get(path=name).updated
+		return StoredFile.objects.only("updated").get(path=name).updated
 
