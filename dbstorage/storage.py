@@ -6,6 +6,7 @@ from django.conf import settings
 from .models import StoredFile, get_url_for_path, PATH_MAX_LENGTH
 
 import hashlib, mimetypes, os.path
+import magic
 
 @deconstructible
 class DatabaseStorage(Storage):
@@ -58,15 +59,15 @@ class DatabaseStorage(Storage):
 		# space to store the name, use SHA1 rather than SHA256.
 		new_name = hashlib.sha1(content).hexdigest().lower()
 
-		# If the name has a file extension, normalize the extension based
-		# on the presumed MIME type of the extension. Cap at 10 characters.
-		if "." in name:
-			ext = name.rsplit(".", 1)[-1]
-			mime_type, encoding = mimetypes.guess_type(name, strict=False)
-			if mime_type:
-				ext = mimetypes.guess_extension(mime_type, strict=False)
-				if ext:
-					new_name += ext[:10]
+		# Generate a file extension to make downloads have nice file names.
+		# Determine the MIME type from the content.
+		with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
+			mime_type = m.id_buffer(content)
+
+		# Then choose a canonical extension. Cap at 10 characters.
+		ext = mimetypes.guess_extension(mime_type, strict=False)
+		if ext:
+			new_name += ext[:10]
 
 		# Preserve the path where the image is stored (this usually comes from
 		# upload_to) -- ignore the part after the last slash (the filename).

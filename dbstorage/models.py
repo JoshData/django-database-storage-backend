@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 import urllib.parse
 
 import base64
-import mimetypes
+import magic
 import zlib
 
 # path.max_length is at least as large as the default for
@@ -35,15 +35,14 @@ class StoredFile(models.Model):
 		return get_url_for_path(self.path)
 
 	def save(self, *args, **kwargs):
-		# Guess MIME type if not set explicitly.
-		if self.mime_type == None:
-			mime_type, encoding = mimetypes.guess_type(self.path)
-			self.mime_type = mime_type
-
 		super(StoredFile, self).save()
 
-
 	def set_blob(self, data, compression=9):
+		with magic.Magic(flags=magic.MAGIC_MIME_TYPE) as m:
+			self.mime_type = m.id_buffer(data)
+		if not self.mime_type:
+			self.mime_type = "application/octet-stream"
+
 		self.size = len(data)
 
 		self.gzipped = True
@@ -54,8 +53,6 @@ class StoredFile(models.Model):
 
 		self.value = data
 		self.encoded_size = len(data)
-
-		self.mime_type = None
 
 	def get_blob(self):
 		data = self.value

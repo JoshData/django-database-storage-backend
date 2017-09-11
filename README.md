@@ -6,6 +6,10 @@ This module provides an app named `dbstorage`. The app contains a single model `
 
 ## Usage
 
+Install libmagic, e.g.:
+
+	brew install libmagic
+
 Install this package:
 
 	pip3 install git+https://github.com/if-then-fund/django-database-storage
