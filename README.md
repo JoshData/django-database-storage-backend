@@ -12,7 +12,7 @@ Install libmagic, e.g.:
 
 Install this package:
 
-	pip3 install git+https://github.com/if-then-fund/django-database-storage
+	pip django-database-storage-backend
 
 Put `'dbstorage'` in your `INSTALLED_APPS` in your `settings.py`.
 
@@ -41,3 +41,15 @@ Files saved into this field will be stored in the database and available at the 
 ## Dynamic image resizing
 
 When storing images, the view method can automatically resize an image to one of a few pre-defined sizes. To use this feature, you must install `pillow`. Then add `?width=` plus `xs` (768px), `sm` (1024 px), `md` (1100px), or `lg` (1400px) to the URL when accessing the image. The image returned in the response will have this size as a maximum dimension.
+
+For Project Maintainers
+-----------------------
+
+To publish a universal wheel to pypi::
+
+        pip3 install twine
+        rm -rf dist
+        python3 setup.py bdist_wheel --universal
+        twine upload dist/*
+        git tag v1.0.XXX
+        git push --tags
