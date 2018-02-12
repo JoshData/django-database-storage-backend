@@ -4,8 +4,8 @@
 from setuptools import setup
 
 setup(name='django-database-storage-backend',
-      version='0.0.2',
-      description='A Django 1.7+ storages backend backed by your existing database.',
+      version='0.0.3',
+      description='A Django 1.10+ storages backend backed by your existing database.',
       author='Joshua Tauberer',
       author_email='jt@occams.info',
       install_requires=["filemagic"],
