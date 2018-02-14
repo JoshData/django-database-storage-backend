@@ -49,7 +49,7 @@ class StoredFile(models.Model):
 		data = zlib.compress(data, compression)
 
 		self.encoding = 1
-		data = base64.b64encode(data)
+		data = base64.b64encode(data).decode("ascii")
 
 		self.value = data
 		self.encoded_size = len(data)
@@ -58,7 +58,9 @@ class StoredFile(models.Model):
 		data = self.value
 
 		if self.encoding == 1:
-			data = base64.b64decode(data)
+			data = base64.b64decode(data.encode("ascii"))
+		else:
+			raise ValueError()
 
 		if self.gzipped:
 			data = zlib.decompress(data)
