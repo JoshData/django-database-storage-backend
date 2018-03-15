@@ -30,7 +30,9 @@ Add a File or ImageFile field to your model:
 
 	image = models.ImageField(upload_to='some-root')
 
-Files saved into this field will be stored in the database and available at the URL path `/user-media/some-root/{HASH}.{EXT}`. `HASH` is the SHA-1 hash of the file content. The file extension is replaced with a normalized file extension by auto-detecting the file type so that no file name information besides the file's type is leaked. This also prevents unauthorized users from randomly guessing the URLs to uploaded files.
+Files saved into this field will be stored in the database and available at the URL path `/user-media/some-root/{HASH}.{EXT}`. `HASH` is the SHA-1 hash of the file content. The file extension is replaced with a normalized file extension by auto-detecting the file type so that no file name information besides the file's type is leaked. This also prevents unauthorized users from randomly guessing the URLs to uploaded files (although SHA-1 is generally deprecated for security purposes in favor of SHA-256 --- so don't use this as your only form of authorization logic if it matters).
+
+The `upload_to` value cannot be more than 200 characters as the maximum full path length is 255 characters.
 
 ## Features
 

@@ -6,9 +6,14 @@ import base64
 import magic
 import zlib
 
-# path.max_length is at least as large as the default for
-# the FileField plus the maximum length of any upload_to.
-PATH_MAX_LENGTH = 256
+# path.max_length is at least as large as the sum of:
+# * the maximum length of any FileField's 'upload_to' attribute
+# * the length of a SHA-1 hash in hex (40 characters)
+# * a period and ten-character file extension (11 characters)
+# and should not be larger than 255 because that is the
+# maximum length for a MySQL char column with a UNIQUE
+# index.
+PATH_MAX_LENGTH = 255
 
 class StoredFile(models.Model):
 	"""A file stored in the storage."""
