@@ -1,6 +1,6 @@
-# django-database-storage
+# django-database-storage-backend
 
-A Django 1.10-2.0 storages backend backed by your existing database.
+A Django 1.10+/2.x storages backend backed by your existing database.
 
 This module provides an app named `dbstorage`. The app contains a single model `StoredFile` which is where files stored with the storage backend are put. The app also provides `DatabaseStorage` which you can set on your file fields.
 
